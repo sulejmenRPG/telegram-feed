@@ -246,7 +246,7 @@
         overflow: hidden;
         position: relative;
         background-color: var(--color-background-secondary);
-        max-height: 20rem;
+        max-height: 32rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -254,8 +254,9 @@
         &-preview {
           width: 100%;
           height: auto;
+          max-height: 32rem;
           display: block;
-          object-fit: cover;
+          object-fit: contain;
         }
 
         &-play-icon {

@@ -37,7 +37,7 @@ const FeedItem: FC<{
 }> = ({ messageKey, message, chat, onNavigate }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     // Fix: Pass message.content as second argument
-    const mediaHash = getMessageMediaHash(message, message.content, 'pictogram');
+    const mediaHash = getMessageMediaHash(message, message.content, 'preview');
     const mediaBlobUrl = useMedia(mediaHash);
 
     // Fix: Get media object for thumbnail
