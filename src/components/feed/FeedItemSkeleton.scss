@@ -1,0 +1,89 @@
+// Пульсирующая анимация для skeleton
+@keyframes skeletonPulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.feed-item-bubble.skeleton {
+
+    .skeleton-avatar,
+    .skeleton-title,
+    .skeleton-date,
+    .skeleton-line,
+    .skeleton-media {
+        background: linear-gradient(90deg,
+                var(--color-background-secondary) 0%,
+                var(--color-background-secondary-accent) 50%,
+                var(--color-background-secondary) 100%);
+        background-size: 200% 100%;
+        animation: skeletonPulse 1.5s ease-in-out infinite;
+        border-radius: 4px;
+    }
+
+    .skeleton-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .skeleton-title {
+        height: 1rem;
+        width: 60%;
+        margin-bottom: 0.25rem;
+    }
+
+    .skeleton-date {
+        height: 0.75rem;
+        width: 40%;
+    }
+
+    .skeleton-text {
+        margin-top: 0.5rem;
+    }
+
+    .skeleton-line {
+        height: 0.875rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+
+        &.short {
+            width: 70%;
+            margin-bottom: 0;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .skeleton-media {
+        height: 12rem;
+        width: 100%;
+        margin-top: 0.5rem;
+        border-radius: 0.5rem;
+    }
+}
+
+// Mobile adjustments
+@media (max-width: 600px) {
+    .feed-item-bubble.skeleton {
+        .skeleton-avatar {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .skeleton-media {
+            height: 10rem;
+        }
+    }
+}
