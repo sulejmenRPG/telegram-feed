@@ -1,0 +1,133 @@
+.FeedMessage {
+    position: relative;
+    margin-bottom: 0.5rem;
+    background: var(--color-background-secondary);
+    border-radius: 0.75rem;
+    overflow: hidden;
+
+    // Channel header
+    &-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--color-background);
+        border-bottom: 1px solid var(--color-borders);
+    }
+
+    &-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &-title {
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--color-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &-date {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+    }
+
+    // Native message content
+    &-content {
+
+        // Override Message styles for feed context
+        .Message {
+            margin: 0 !important;
+            padding: 0 !important;
+
+            // Remove message bubble background since we have card bg
+            .message-content,
+            .content-inner {
+                background: transparent !important;
+            }
+
+            // Hide avatar since we show it in header
+            .Avatar {
+                display: none !important;
+            }
+
+            // Hide sender name since we show it in header
+            .message-title {
+                display: none !important;
+            }
+
+            // Override first/last in group styling
+            &.first-in-group,
+            &.last-in-group {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            // Make sure media fills properly
+            .media-inner,
+            .full-media {
+                max-width: 100%;
+            }
+
+            // Photo and video sizing
+            .Photo,
+            .Video {
+                max-height: 24rem;
+                overflow: hidden;
+            }
+
+            // Text styling
+            .text-content {
+                padding: 0.75rem 1rem;
+            }
+        }
+    }
+
+    // Footer with navigate button
+    &-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.5rem 1rem 0.75rem;
+        background: var(--color-background-secondary);
+    }
+
+    &-goto {
+        font-size: 0.8125rem !important;
+        color: var(--color-primary) !important;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}
+
+// Mobile styles
+@media (max-width: 600px) {
+    .FeedMessage {
+        border-radius: 0;
+        margin-bottom: 0.25rem;
+
+        &-header {
+            padding: 0.5rem 0.75rem;
+        }
+
+        &-footer {
+            padding: 0.5rem 0.75rem;
+        }
+
+        &-content {
+            .Message {
+                .text-content {
+                    padding: 0.5rem 0.75rem;
+                }
+
+                .Photo,
+                .Video {
+                    max-height: 16rem;
+                }
+            }
+        }
+    }
+}
