@@ -230,15 +230,18 @@ addActionHandler('applyFeedFilter', (global, actions, payload): ActionReturnType
     console.log('[Feed Filter] Applying filter:', filter.name);
     console.log('[Feed Filter] Excluded chat IDs:', filter.excludedChatIds);
 
-    // CLIENT-SIDE FILTERING: Filter allMessageIds instead of reloading from server
+    // Use allMessageIds if available, otherwise fallback to current messageIds
+    const sourceMessageIds = allMessageIds.length > 0 ? allMessageIds : feed.messageIds;
+
+    // CLIENT-SIDE FILTERING: Filter sourceMessageIds instead of reloading from server
     const messageIds = filter.excludedChatIds.length > 0
-        ? allMessageIds.filter((key) => {
+        ? sourceMessageIds.filter((key) => {
             const [chatId] = parseSearchResultKey(key as any);
             return !filter.excludedChatIds.includes(chatId);
         })
-        : allMessageIds;
+        : sourceMessageIds;
 
-    console.log('[Feed Filter] Filtered from', allMessageIds.length, 'to', messageIds.length, 'messages (instant client-side filtering)');
+    console.log('[Feed Filter] Filtered from', sourceMessageIds.length, 'to', messageIds.length, 'messages (instant client-side filtering)');
 
     // Apply filter by setting excluded chat IDs and filtered messageIds
     global = updateTabState(global, {
