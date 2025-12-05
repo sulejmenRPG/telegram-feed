@@ -14,6 +14,7 @@ import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import FeedSettings from './FeedSettings';
 import FeedItemSkeleton from './FeedItemSkeleton';
+import useFeedVirtualization from '../../hooks/useFeedVirtualization';
 
 import './FeedColumn.scss';
 
@@ -430,6 +431,32 @@ const FeedColumn: FC<StateProps> = ({
 
     const activeFilter = savedFilters.find((f) => f.id === activeFilterId);
 
+    // Prepare items for virtualization
+    const feedItems = useMemo(() => {
+        return messageIds.map((key) => {
+            const data = messagesById[key];
+            if (!data) return null;
+            return { key, message: data.message, chat: data.chat };
+        }).filter(Boolean) as Array<{ key: string; message: ApiMessage; chat: ApiChat }>;
+    }, [messageIds, messagesById]);
+
+    // Virtualization hook
+    const {
+        visibleItems,
+        virtualContainerStyle,
+        virtualContentStyle,
+        handleScroll: handleVirtualScroll,
+    } = useFeedVirtualization(feedItems, containerRef, {
+        estimatedItemHeight: 350,
+        overscan: 5,
+    });
+
+    // Combined scroll handler
+    const handleCombinedScroll = useCallback((e: any) => {
+        handleScroll();
+        handleVirtualScroll(e);
+    }, [handleScroll, handleVirtualScroll]);
+
     const content = useMemo(() => {
         if (isLoading && !messageIds.length) {
             // Show 5 skeleton items while loading
@@ -448,26 +475,23 @@ const FeedColumn: FC<StateProps> = ({
             return <div className="feed-empty">Нет сообщений</div>;
         }
 
-        return messageIds.map((key) => {
-            // Fix: cast key to any for parseSearchResultKey
-            const [chatId, messageId] = parseSearchResultKey(key as any);
-            const data = messagesById[key];
-
-            // If message is not in messagesById (maybe not loaded yet?), try to select it
-            // But messagesById is passed from props.
-            if (!data) return null;
-
-            return (
-                <FeedItem
-                    key={key}
-                    messageKey={key}
-                    message={data.message}
-                    chat={data.chat}
-                    onNavigate={handleNavigate}
-                />
-            );
-        });
-    }, [messageIds, messagesById, isLoading, handleNavigate]);
+        // Virtualized rendering - only render visible items!
+        return (
+            <div style={virtualContainerStyle as any}>
+                <div style={virtualContentStyle as any}>
+                    {visibleItems.map((item) => (
+                        <FeedItem
+                            key={item.key}
+                            messageKey={item.key}
+                            message={item.message}
+                            chat={item.chat}
+                            onNavigate={handleNavigate}
+                        />
+                    ))}
+                </div>
+            </div>
+        );
+    }, [messageIds.length, isLoading, handleNavigate, visibleItems, virtualContainerStyle, virtualContentStyle]);
 
     return (
         <div className={`FeedColumn${isClosing ? ' closing' : ''}`}
@@ -520,7 +544,7 @@ const FeedColumn: FC<StateProps> = ({
             <div
                 className="FeedColumn-content custom-scroll"
                 ref={containerRef}
-                onScroll={handleScroll}
+                onScroll={handleCombinedScroll}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
