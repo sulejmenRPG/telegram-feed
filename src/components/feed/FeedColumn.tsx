@@ -14,6 +14,7 @@ import Loading from '../ui/Loading';
 import Button from '../ui/Button';
 import FeedSettings from './FeedSettings';
 import FeedItemSkeleton from './FeedItemSkeleton';
+import FeedMessage from './FeedMessage';
 import useFeedVirtualization from '../../hooks/useFeedVirtualization';
 
 import './FeedColumn.scss';
@@ -28,113 +29,6 @@ type StateProps = {
     hasInitialScroll: boolean;
     isLoadingMore: boolean;
     isClosing: boolean;
-};
-
-const FeedItem: FC<{
-    messageKey: string;
-    message: ApiMessage;
-    chat: ApiChat;
-    onNavigate: (chatId: string, messageId: number) => void;
-}> = ({ messageKey, message, chat, onNavigate }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    // Fix: Pass message.content as second argument
-    const mediaHash = getMessageMediaHash(message, message.content, 'preview');
-    const mediaBlobUrl = useMedia(mediaHash);
-
-    // Fix: Get media object for thumbnail
-    const media = message.content.photo || message.content.video;
-    const mediaThumbUri = media ? getMediaThumbUri(media) : undefined;
-
-    const handleNavigateClick = useCallback(() => {
-        onNavigate(chat.id, message.id);
-    }, [chat.id, message.id, onNavigate]);
-
-    const renderText = () => {
-        if (!message.content.text) return null;
-
-        const text = message.content.text.text;
-        const isLong = text.length > 500;
-
-        if (isLong && !isExpanded) {
-            return (
-                <>
-                    <p>{text.slice(0, 500)}...</p>
-                    <button className="feed-item-expand" onClick={() => setIsExpanded(true)}>
-                        Развернуть
-                    </button>
-                </>
-            );
-        }
-
-        return <p>{text}</p>;
-    };
-
-    const renderMedia = () => {
-        if (!message.content.photo && !message.content.video) return null;
-
-        const photoUrl = mediaBlobUrl || mediaThumbUri;
-        if (!photoUrl) return null;
-
-        return (
-            <div className="feed-item-media">
-                <img
-                    src={photoUrl}
-                    alt=""
-                    className="feed-item-media-preview"
-                    loading="lazy"
-                    decoding="async"
-                />
-                {message.content.video && (
-                    <div className="feed-item-media-play-icon">
-                        <i className="icon icon-play" />
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    return (
-        <div className="feed-item">
-            <div className="feed-item-bubble">
-                <div className="feed-item-header">
-                    <Avatar size="small" peer={chat} />
-                    <div className="feed-item-info">
-                        <div className="feed-item-title">{chat.title}</div>
-                        <div className="feed-item-date">
-                            {new Date(message.date * 1000).toLocaleString('ru-RU', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div className="feed-item-content">
-                    <div className="feed-item-text">{renderText()}</div>
-                    {renderMedia()}
-                </div>
-                <div className="feed-item-footer">
-                    {message.reactions && message.reactions.results.length > 0 && (
-                        <div className="feed-item-reactions">
-                            {message.reactions.results.map((reaction: any, index: number) => (
-                                <span key={index} className="feed-item-reaction">
-                                    <span className="feed-item-reaction-emoji">
-                                        {reaction.reaction.emoticon || '❤️'}
-                                    </span>
-                                    <span className="feed-item-reaction-count">{reaction.count}</span>
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                    <button className="feed-item-goto-link" onClick={handleNavigateClick}>
-                        Перейти →
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
 };
 
 const SCROLL_THRESHOLD = 500;
@@ -475,17 +369,19 @@ const FeedColumn: FC<StateProps> = ({
             return <div className="feed-empty">Нет сообщений</div>;
         }
 
-        // Virtualized rendering - only render visible items!
+        // Virtualized rendering - only render visible items with native Message!
         return (
             <div style={virtualContainerStyle as any}>
                 <div style={virtualContentStyle as any}>
-                    {visibleItems.map((item) => (
-                        <FeedItem
+                    {visibleItems.map((item, idx) => (
+                        <FeedMessage
                             key={item.key}
-                            messageKey={item.key}
                             message={item.message}
                             chat={item.chat}
                             onNavigate={handleNavigate}
+                            isFirstInGroup
+                            isLastInGroup
+                            appearanceOrder={visibleItems.length - idx}
                         />
                     ))}
                 </div>
