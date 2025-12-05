@@ -103,6 +103,7 @@
     cursor: pointer;
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain; // Prevent scroll chaining
 
     // Pull to Refresh
     .pull-to-refresh {
@@ -240,13 +241,13 @@
       }
 
       &-media {
-        max-width: 100%;
+        max-width: 400px; // Limit width on desktop for compact cards
         margin-top: 0.5rem;
         border-radius: 0.5rem;
         overflow: hidden;
         position: relative;
         background-color: var(--color-background-secondary);
-        max-height: 32rem;
+        max-height: 20rem; // Reduced from 32rem
         display: flex;
         align-items: center;
         justify-content: center;
@@ -254,7 +255,7 @@
         &-preview {
           width: 100%;
           height: auto;
-          max-height: 32rem;
+          max-height: 20rem; // Reduced from 32rem
           display: block;
           object-fit: contain;
         }
@@ -437,9 +438,14 @@
     &-content {
       padding: 0.25rem 0;
       background: #0e1621 !important; // Темный фон
+      -webkit-overflow-scrolling: touch; // iOS momentum scroll
+      overscroll-behavior: contain;
 
       .feed-item {
         max-width: 100%;
+        // Remove content-visibility on mobile to prevent scroll jumps
+        content-visibility: visible;
+        contain-intrinsic-size: auto;
         padding: 0 0.5rem;
         margin-bottom: 0.375rem;
         margin-left: 0;
@@ -468,6 +474,7 @@
         }
 
         &-media {
+          max-width: 100%; // Full width on mobile
           max-height: 16rem;
           border-radius: 0.5rem;
         }

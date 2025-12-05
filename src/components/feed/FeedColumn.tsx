@@ -397,6 +397,10 @@ const FeedColumn: FC<StateProps> = ({
 
     const handleNavigate = useCallback(
         (chatId: string, messageId: number) => {
+            // Save scroll position BEFORE closing feed
+            if (containerRef.current) {
+                saveFeedScrollPosition({ scrollPosition: containerRef.current.scrollTop });
+            }
             setPreviousView({ view: 'feed' });
             toggleFeed();
             openChat({ id: chatId });
@@ -404,7 +408,7 @@ const FeedColumn: FC<StateProps> = ({
                 focusMessage({ chatId, threadId: -1, messageId });
             }, 100);
         },
-        [openChat, focusMessage, toggleFeed, setPreviousView]
+        [openChat, focusMessage, toggleFeed, setPreviousView, saveFeedScrollPosition]
     );
 
     const handleClearFilter = useCallback(() => {
