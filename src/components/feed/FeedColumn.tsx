@@ -159,6 +159,7 @@ const FeedColumn: FC<StateProps> = ({
         saveFeedScrollPosition,
         clearFeedFilter,
         setFeedInitialScroll,
+        applyFeedFilter,
     } = getActions();
 
     // Fix: useRef<HTMLDivElement | null>
@@ -338,13 +339,25 @@ const FeedColumn: FC<StateProps> = ({
         loadFeedMessages();
     }, []);
 
-    // Restore saved scroll position once when scrollPosition becomes available
+    // Auto-apply first saved filter on feed open if no active filter
     useEffect(() => {
-        if (!isScrollRestoredRef.current && containerRef.current && scrollPosition > 0) {
-            containerRef.current.scrollTop = scrollPosition;
-            isScrollRestoredRef.current = true;
+        if (savedFilters.length > 0 && !activeFilterId && messageIds.length > 0) {
+            applyFeedFilter({ filterId: savedFilters[0].id });
         }
-    }, [scrollPosition]);
+    }, [savedFilters, activeFilterId, messageIds.length, applyFeedFilter]);
+
+    // Restore saved scroll position when messages are loaded
+    useEffect(() => {
+        if (!isScrollRestoredRef.current && containerRef.current && scrollPosition > 0 && messageIds.length > 0) {
+            // Use setTimeout to ensure DOM is updated
+            setTimeout(() => {
+                if (containerRef.current) {
+                    containerRef.current.scrollTop = scrollPosition;
+                    isScrollRestoredRef.current = true;
+                }
+            }, 100);
+        }
+    }, [scrollPosition, messageIds.length]);
 
     // Save scroll position when component unmounts
     useEffect(() => {
@@ -356,13 +369,13 @@ const FeedColumn: FC<StateProps> = ({
         };
     }, [saveFeedScrollPosition]);
 
-    // Initial scroll to bottom on first open
+    // Initial scroll to bottom on first open (only if no saved position)
     useEffect(() => {
-        if (!hasInitialScroll && messageIds.length > 0 && containerRef.current) {
+        if (!hasInitialScroll && messageIds.length > 0 && containerRef.current && scrollPosition === 0) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
             setFeedInitialScroll();
         }
-    }, [hasInitialScroll, messageIds.length, setFeedInitialScroll]);
+    }, [hasInitialScroll, messageIds.length, setFeedInitialScroll, scrollPosition]);
 
     const handleScroll = useCallback(() => {
         const container = containerRef.current;

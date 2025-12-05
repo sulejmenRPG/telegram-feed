@@ -241,13 +241,13 @@
       }
 
       &-media {
-        max-width: 400px; // Limit width on desktop for compact cards
+        max-width: 100%; // Full width, no empty space
         margin-top: 0.5rem;
         border-radius: 0.5rem;
         overflow: hidden;
         position: relative;
         background-color: var(--color-background-secondary);
-        max-height: 20rem; // Reduced from 32rem
+        max-height: 24rem; // Slightly reduced for compact look
         display: flex;
         align-items: center;
         justify-content: center;
@@ -255,7 +255,7 @@
         &-preview {
           width: 100%;
           height: auto;
-          max-height: 20rem; // Reduced from 32rem
+          max-height: 24rem;
           display: block;
           object-fit: contain;
         }
